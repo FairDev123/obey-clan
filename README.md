@@ -7,7 +7,7 @@
 <h2>/search command</h2>
 <h3>Searching member by ingame id:</h3>
 <ul>
-<li>/search id:1234 - search discord member by discord id</li>
+<li><b>/search id:1234</b> - search discord member by discord id</li>
 </ul>
 
 
