@@ -4,5 +4,7 @@
 
 <h1>[📚] Rule book for staff</h1>
 
-<h2><b>/search</b> command</h2>
+<h2>/search command</h2>
+<h3>Searching member by ingame id:</h3>
+
 
