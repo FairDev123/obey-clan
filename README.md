@@ -4,3 +4,5 @@
 
 <h1>[📚] Rule book for staff</h1>
 
+<h2><b>/search</b> command</h2>
+
