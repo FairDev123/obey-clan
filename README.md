@@ -13,7 +13,7 @@
 <h2>/rawjoin command</h2>
 <ul>
 <p>Command Syntax</p>
-<li><b>/rawjoin</b> member:424502321800675328 id:921921914 clan_role: Clan Member</li>
+<li><b>/rawjoin</b> <b>member</b>:424502321800675328 <b>id</b>:921921914 <b>clan_role</b>: Clan Member</li>
 <h3>Syntax Explaination:</h3>
 <p><b>member</b> - discord member id or tag (you can use both)</p>
 <p><b>id</b> - ingame id you need to pass here</p>
