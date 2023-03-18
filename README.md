@@ -2,7 +2,7 @@
 
 <p>Super usefull bot for members management. Bot can search user by id, discord id etc. Bot is also responsible for tickets system for member recruiting and finding help with own tasks! Can ping and dm users via fancy embed with all info about clan member. Great bot for bot for clan discord servers!</p>
 
-<h1>[📚] Rule book for staff</h1>
+<h1>[📚] Guide book for staff</h1>
 
 <h2>/search command</h2>
 <ul>
