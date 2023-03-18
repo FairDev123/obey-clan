@@ -5,9 +5,10 @@
 <h1>[📚] Rule book for staff</h1>
 
 <h2>/search command</h2>
-<h3>Searching member by ingame id:</h3>
+<h3>Searching member:</h3>
 <ul>
-<li><b>/search id:1234</b> - search discord member by discord id</li>
+<li><b>/search id:1234</b> - search discord member by discord id (you can use first or last number and bot still can search for user)</li>
+ <li><b>/search id:1234</b> - search discord member by discord id</li>
 </ul>
 
 
