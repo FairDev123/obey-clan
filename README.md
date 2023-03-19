@@ -21,4 +21,5 @@
 </ul>
 <h2>/blacklist_add command</h2>
   <p>Blacklist add command is for adding "spies" to the list. You can add ingame ID (pixel gun id) or also you can add discord_id, which prevents that user from making another tickets with different name</p>
+  <p>You can add more than one person by separating ids (discord_id and ingame_id) with a space</p>
 
