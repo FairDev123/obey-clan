@@ -20,4 +20,5 @@
     <p><b>clan_role</b> - here you set roles in the member (options: <b>Clan Member, Clan Officer, Leader, Co-Leader, Ally, Helper</b>)</p>
 </ul>
 <h2>/blacklist_add command</h2>
+  <p>Blacklist add command is for adding "spies" to the list. You can add ingame ID (pixel gun id) or also you can add discord_id, which prevents that user from making another tickets with different name</p>
 
