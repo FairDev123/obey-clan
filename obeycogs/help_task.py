@@ -57,8 +57,8 @@ class TasksButtons(discord.ui.View):
     def __init__(self, *, timeout=None):
         super().__init__(timeout=timeout)
 
-    @discord.ui.button(custom_id="battle_royale", label="Battle Royale", style=discord.ButtonStyle.blurple, emoji='<:battle_royale_icon:1086260356453761054>')
-    async def battle_royale(self, ctx:discord.Interaction, button: discord.ui.button):
+    @discord.ui.button(custom_id="battle-royale", label="Battle Royale", style=discord.ButtonStyle.blurple, emoji='<:battle_royale_icon:1086260356453761054>')
+    async def royale(self, ctx:discord.Interaction, button: discord.ui.button):
         
         # # Database and misc.
         guild = ctx.guild
@@ -84,6 +84,7 @@ class TasksButtons(discord.ui.View):
         category = discord.utils.get(ctx.guild.categories, id=1085983572436992061)
 
         # # roles define and overwrites for these roles
+        not_in_clan =get(guild.roles, id=988039468013473802)
         officer =get(guild.roles, id=881749441734914100)
         clan_member =get(guild.roles, id=881330782185074718)
         ally =get(guild.roles, id=989171283348574268)
@@ -91,6 +92,7 @@ class TasksButtons(discord.ui.View):
 
         overwrites = {
             ctx.guild.default_role: discord.PermissionOverwrite(view_channel=False),
+            not_in_clan: discord.PermissionOverwrite(view_channel = True, send_messages = True, attach_files=True, embed_links = True),
             clan_member: discord.PermissionOverwrite(view_channel = True, send_messages = True, attach_files=True, embed_links = True),
             officer: discord.PermissionOverwrite(view_channel = True, send_messages = True, attach_files=True, embed_links = True),
             ally: discord.PermissionOverwrite(view_channel = True, send_messages = True, attach_files=True, embed_links = True),
@@ -108,6 +110,116 @@ class TasksButtons(discord.ui.View):
 
         with open("./obey database/help_indexing.json", "w") as f:
             index.update({"royale":str(ticket_ebt)})
+            json.dump(index, f)
+
+    @discord.ui.button(custom_id="team-battle", label="Team Battle", style=discord.ButtonStyle.blurple, emoji='<:team:1087099513170301038>')
+    async def team_battle(self, ctx:discord.Interaction, button: discord.ui.button):
+        
+        # # Database and misc.
+        guild = ctx.guild
+        with open("./obey database/help_indexing.json", "r") as f:
+            index = json.load(f)
+            team = index["team"]
+            ticket_ebt = int(team) + 1
+
+        # # number prefixing
+        if len(str(ticket_ebt)) == 1:
+            ticket_prefix = "000"
+        if len(str(ticket_ebt)) == 2:
+            ticket_prefix = "00"
+        if len(str(ticket_ebt)) == 3:
+            ticket_prefix = "0"
+        if len(str(ticket_ebt)) == 4:
+            ticket_prefix = ""
+
+        # # Full ticket name (name, number)
+        full_ticket = f"team-{ticket_prefix}{int(team) + 1}"
+
+        # # Category for creating tickets
+        category = discord.utils.get(ctx.guild.categories, id=1085983572436992061)
+
+        # # roles define and overwrites for these roles
+        not_in_clan =get(guild.roles, id=988039468013473802)
+        officer =get(guild.roles, id=881749441734914100)
+        clan_member =get(guild.roles, id=881330782185074718)
+        ally =get(guild.roles, id=989171283348574268)
+        helper =get(guild.roles, id=980100979171151922)
+
+        overwrites = {
+            ctx.guild.default_role: discord.PermissionOverwrite(view_channel=False),
+            not_in_clan: discord.PermissionOverwrite(view_channel = True, send_messages = True, attach_files=True, embed_links = True),
+            clan_member: discord.PermissionOverwrite(view_channel = True, send_messages = True, attach_files=True, embed_links = True),
+            officer: discord.PermissionOverwrite(view_channel = True, send_messages = True, attach_files=True, embed_links = True),
+            ally: discord.PermissionOverwrite(view_channel = True, send_messages = True, attach_files=True, embed_links = True),
+            helper: discord.PermissionOverwrite(view_channel = True, send_messages = True, attach_files=True, embed_links = True)
+        }
+
+        # # Ticket Creation
+        ticket_channel = await ctx.guild.create_text_channel(name=full_ticket, category=category, overwrites=overwrites, topic=(ctx.user.id))
+
+        done = discord.Embed(description=f"Successfully created ticket at {ticket_channel.mention}")
+        await ctx.response.send_message(embed=done, ephemeral=True)
+
+        ticket_message = discord.Embed(description=f"Hello {ctx.user.mention} explain your task **below**\n\nTask category: **Team Battle**")
+        await ticket_channel.send(f"User",embed=ticket_message, view=TopTaskDoneButton())
+
+        with open("./obey database/help_indexing.json", "w") as f:
+            index.update({"team":str(ticket_ebt)})
+            json.dump(index, f)
+
+    @discord.ui.button(custom_id="deathmatch", label="Deathmatch", style=discord.ButtonStyle.blurple, emoji='<:gamemode_deathmatch:1087098185949913158>')
+    async def deathmatch(self, ctx:discord.Interaction, button: discord.ui.button):
+        
+        # # Database and misc.
+        guild = ctx.guild
+        with open("./obey database/help_indexing.json", "r") as f:
+            index = json.load(f)
+            death = index["death"]
+            ticket_ebt = int(death) + 1
+
+        # # number prefixing
+        if len(str(ticket_ebt)) == 1:
+            ticket_prefix = "000"
+        if len(str(ticket_ebt)) == 2:
+            ticket_prefix = "00"
+        if len(str(ticket_ebt)) == 3:
+            ticket_prefix = "0"
+        if len(str(ticket_ebt)) == 4:
+            ticket_prefix = ""
+
+        # # Full ticket name (name, number)
+        full_ticket = f"deathmatch-{ticket_prefix}{int(death) + 1}"
+
+        # # Category for creating tickets
+        category = discord.utils.get(ctx.guild.categories, id=1085983572436992061)
+
+        # # roles define and overwrites for these roles
+        not_in_clan =get(guild.roles, id=988039468013473802)
+        officer =get(guild.roles, id=881749441734914100)
+        clan_member =get(guild.roles, id=881330782185074718)
+        ally =get(guild.roles, id=989171283348574268)
+        helper =get(guild.roles, id=980100979171151922)
+
+        overwrites = {
+            ctx.guild.default_role: discord.PermissionOverwrite(view_channel=False),
+            not_in_clan: discord.PermissionOverwrite(view_channel = True, send_messages = True, attach_files=True, embed_links = True),
+            clan_member: discord.PermissionOverwrite(view_channel = True, send_messages = True, attach_files=True, embed_links = True),
+            officer: discord.PermissionOverwrite(view_channel = True, send_messages = True, attach_files=True, embed_links = True),
+            ally: discord.PermissionOverwrite(view_channel = True, send_messages = True, attach_files=True, embed_links = True),
+            helper: discord.PermissionOverwrite(view_channel = True, send_messages = True, attach_files=True, embed_links = True)
+        }
+
+        # # Ticket Creation
+        ticket_channel = await ctx.guild.create_text_channel(name=full_ticket, category=category, overwrites=overwrites, topic=(ctx.user.id))
+
+        done = discord.Embed(description=f"Successfully created ticket at {ticket_channel.mention}")
+        await ctx.response.send_message(embed=done, ephemeral=True)
+
+        ticket_message = discord.Embed(description=f"Hello {ctx.user.mention} explain your task **below**\n\nTask category: **Deathmatch**")
+        await ticket_channel.send(f"User",embed=ticket_message, view=TopTaskDoneButton())
+
+        with open("./obey database/help_indexing.json", "w") as f:
+            index.update({"death":str(ticket_ebt)})
             json.dump(index, f)
     
     @discord.ui.button(custom_id="flags", label="Flag Capture", style=discord.ButtonStyle.blurple, emoji='<:Mode_flag_icon:1086287879057182841>')
@@ -136,6 +248,7 @@ class TasksButtons(discord.ui.View):
         category = discord.utils.get(ctx.guild.categories, id=1085983572436992061)
 
         # # roles define and overwrites for these roles
+        not_in_clan =get(guild.roles, id=988039468013473802)
         officer =get(guild.roles, id=881749441734914100)
         clan_member =get(guild.roles, id=881330782185074718)
         ally =get(guild.roles, id=989171283348574268)
@@ -143,6 +256,7 @@ class TasksButtons(discord.ui.View):
 
         overwrites = {
             ctx.guild.default_role: discord.PermissionOverwrite(view_channel=False),
+            not_in_clan: discord.PermissionOverwrite(view_channel = True, send_messages = True, attach_files=True, embed_links = True),
             clan_member: discord.PermissionOverwrite(view_channel = True, send_messages = True, attach_files=True, embed_links = True),
             officer: discord.PermissionOverwrite(view_channel = True, send_messages = True, attach_files=True, embed_links = True),
             ally: discord.PermissionOverwrite(view_channel = True, send_messages = True, attach_files=True, embed_links = True),
@@ -188,6 +302,7 @@ class TasksButtons(discord.ui.View):
         category = discord.utils.get(ctx.guild.categories, id=1085983572436992061)
 
         # # roles define and overwrites for these roles
+        not_in_clan =get(guild.roles, id=988039468013473802)
         officer =get(guild.roles, id=881749441734914100)
         clan_member =get(guild.roles, id=881330782185074718)
         ally =get(guild.roles, id=989171283348574268)
@@ -195,6 +310,7 @@ class TasksButtons(discord.ui.View):
 
         overwrites = {
             ctx.guild.default_role: discord.PermissionOverwrite(view_channel=False),
+            not_in_clan: discord.PermissionOverwrite(view_channel = True, send_messages = True, attach_files=True, embed_links = True),
             clan_member: discord.PermissionOverwrite(view_channel = True, send_messages = True, attach_files=True, embed_links = True),
             officer: discord.PermissionOverwrite(view_channel = True, send_messages = True, attach_files=True, embed_links = True),
             ally: discord.PermissionOverwrite(view_channel = True, send_messages = True, attach_files=True, embed_links = True),
@@ -240,6 +356,7 @@ class TasksButtons(discord.ui.View):
         category = discord.utils.get(ctx.guild.categories, id=1085983572436992061)
 
         # # roles define and overwrites for these roles
+        not_in_clan =get(guild.roles, id=988039468013473802)
         officer =get(guild.roles, id=881749441734914100)
         clan_member =get(guild.roles, id=881330782185074718)
         ally =get(guild.roles, id=989171283348574268)
@@ -247,6 +364,7 @@ class TasksButtons(discord.ui.View):
 
         overwrites = {
             ctx.guild.default_role: discord.PermissionOverwrite(view_channel=False),
+            not_in_clan: discord.PermissionOverwrite(view_channel = True, send_messages = True, attach_files=True, embed_links = True),
             clan_member: discord.PermissionOverwrite(view_channel = True, send_messages = True, attach_files=True, embed_links = True),
             officer: discord.PermissionOverwrite(view_channel = True, send_messages = True, attach_files=True, embed_links = True),
             ally: discord.PermissionOverwrite(view_channel = True, send_messages = True, attach_files=True, embed_links = True),
@@ -292,6 +410,7 @@ class TasksButtons(discord.ui.View):
         category = discord.utils.get(ctx.guild.categories, id=1085983572436992061)
 
         # # roles define and overwrites for these roles
+        not_in_clan =get(guild.roles, id=988039468013473802)
         officer =get(guild.roles, id=881749441734914100)
         clan_member =get(guild.roles, id=881330782185074718)
         ally =get(guild.roles, id=989171283348574268)
@@ -299,6 +418,7 @@ class TasksButtons(discord.ui.View):
 
         overwrites = {
             ctx.guild.default_role: discord.PermissionOverwrite(view_channel=False),
+            not_in_clan: discord.PermissionOverwrite(view_channel = True, send_messages = True, attach_files=True, embed_links = True),
             clan_member: discord.PermissionOverwrite(view_channel = True, send_messages = True, attach_files=True, embed_links = True),
             officer: discord.PermissionOverwrite(view_channel = True, send_messages = True, attach_files=True, embed_links = True),
             ally: discord.PermissionOverwrite(view_channel = True, send_messages = True, attach_files=True, embed_links = True),
@@ -344,6 +464,7 @@ class TasksButtons(discord.ui.View):
         category = discord.utils.get(ctx.guild.categories, id=1085983572436992061)
 
         # # roles define and overwrites for these roles
+        not_in_clan =get(guild.roles, id=988039468013473802)
         officer =get(guild.roles, id=881749441734914100)
         clan_member =get(guild.roles, id=881330782185074718)
         ally =get(guild.roles, id=989171283348574268)
@@ -351,6 +472,7 @@ class TasksButtons(discord.ui.View):
 
         overwrites = {
             ctx.guild.default_role: discord.PermissionOverwrite(view_channel=False),
+            not_in_clan: discord.PermissionOverwrite(view_channel = True, send_messages = True, attach_files=True, embed_links = True),
             clan_member: discord.PermissionOverwrite(view_channel = True, send_messages = True, attach_files=True, embed_links = True),
             officer: discord.PermissionOverwrite(view_channel = True, send_messages = True, attach_files=True, embed_links = True),
             ally: discord.PermissionOverwrite(view_channel = True, send_messages = True, attach_files=True, embed_links = True),
@@ -397,6 +519,7 @@ class TasksButtons(discord.ui.View):
         category = discord.utils.get(ctx.guild.categories, id=1085983572436992061)
 
         # # roles define and overwrites for these roles
+        not_in_clan =get(guild.roles, id=988039468013473802)
         officer =get(guild.roles, id=881749441734914100)
         clan_member =get(guild.roles, id=881330782185074718)
         ally =get(guild.roles, id=989171283348574268)
@@ -404,6 +527,7 @@ class TasksButtons(discord.ui.View):
 
         overwrites = {
             ctx.guild.default_role: discord.PermissionOverwrite(view_channel=False),
+            not_in_clan: discord.PermissionOverwrite(view_channel = True, send_messages = True, attach_files=True, embed_links = True),
             clan_member: discord.PermissionOverwrite(view_channel = True, send_messages = True, attach_files=True, embed_links = True),
             officer: discord.PermissionOverwrite(view_channel = True, send_messages = True, attach_files=True, embed_links = True),
             ally: discord.PermissionOverwrite(view_channel = True, send_messages = True, attach_files=True, embed_links = True),
@@ -450,6 +574,7 @@ class TasksButtons(discord.ui.View):
         category = discord.utils.get(ctx.guild.categories, id=1085983572436992061)
 
         # # roles define and overwrites for these roles
+        not_in_clan =get(guild.roles, id=988039468013473802)
         officer =get(guild.roles, id=881749441734914100)
         clan_member =get(guild.roles, id=881330782185074718)
         ally =get(guild.roles, id=989171283348574268)
@@ -457,6 +582,7 @@ class TasksButtons(discord.ui.View):
 
         overwrites = {
             ctx.guild.default_role: discord.PermissionOverwrite(view_channel=False),
+            not_in_clan: discord.PermissionOverwrite(view_channel = True, send_messages = True, attach_files=True, embed_links = True),
             clan_member: discord.PermissionOverwrite(view_channel = True, send_messages = True, attach_files=True, embed_links = True),
             officer: discord.PermissionOverwrite(view_channel = True, send_messages = True, attach_files=True, embed_links = True),
             ally: discord.PermissionOverwrite(view_channel = True, send_messages = True, attach_files=True, embed_links = True),
@@ -503,6 +629,7 @@ class TasksButtons(discord.ui.View):
         category = discord.utils.get(ctx.guild.categories, id=1085983572436992061)
 
         # # roles define and overwrites for these roles
+        not_in_clan =get(guild.roles, id=988039468013473802)
         officer =get(guild.roles, id=881749441734914100)
         clan_member =get(guild.roles, id=881330782185074718)
         ally =get(guild.roles, id=989171283348574268)
@@ -510,6 +637,7 @@ class TasksButtons(discord.ui.View):
 
         overwrites = {
             ctx.guild.default_role: discord.PermissionOverwrite(view_channel=False),
+            not_in_clan: discord.PermissionOverwrite(view_channel = True, send_messages = True, attach_files=True, embed_links = True),
             clan_member: discord.PermissionOverwrite(view_channel = True, send_messages = True, attach_files=True, embed_links = True),
             officer: discord.PermissionOverwrite(view_channel = True, send_messages = True, attach_files=True, embed_links = True),
             ally: discord.PermissionOverwrite(view_channel = True, send_messages = True, attach_files=True, embed_links = True),
@@ -556,6 +684,7 @@ class TasksButtons(discord.ui.View):
         category = discord.utils.get(ctx.guild.categories, id=1085983572436992061)
 
         # # roles define and overwrites for these roles
+        not_in_clan =get(guild.roles, id=988039468013473802)
         officer =get(guild.roles, id=881749441734914100)
         clan_member =get(guild.roles, id=881330782185074718)
         ally =get(guild.roles, id=989171283348574268)
@@ -563,6 +692,7 @@ class TasksButtons(discord.ui.View):
 
         overwrites = {
             ctx.guild.default_role: discord.PermissionOverwrite(view_channel=False),
+            not_in_clan: discord.PermissionOverwrite(view_channel = True, send_messages = True, attach_files=True, embed_links = True),
             clan_member: discord.PermissionOverwrite(view_channel = True, send_messages = True, attach_files=True, embed_links = True),
             officer: discord.PermissionOverwrite(view_channel = True, send_messages = True, attach_files=True, embed_links = True),
             ally: discord.PermissionOverwrite(view_channel = True, send_messages = True, attach_files=True, embed_links = True),
@@ -608,6 +738,7 @@ class TasksButtons(discord.ui.View):
         category = discord.utils.get(ctx.guild.categories, id=1085983572436992061)
 
         # # roles define and overwrites for these roles
+        not_in_clan =get(guild.roles, id=988039468013473802)
         officer =get(guild.roles, id=881749441734914100)
         clan_member =get(guild.roles, id=881330782185074718)
         ally =get(guild.roles, id=989171283348574268)
@@ -615,6 +746,7 @@ class TasksButtons(discord.ui.View):
 
         overwrites = {
             ctx.guild.default_role: discord.PermissionOverwrite(view_channel=False),
+            not_in_clan: discord.PermissionOverwrite(view_channel = True, send_messages = True, attach_files=True, embed_links = True),
             clan_member: discord.PermissionOverwrite(view_channel = True, send_messages = True, attach_files=True, embed_links = True),
             officer: discord.PermissionOverwrite(view_channel = True, send_messages = True, attach_files=True, embed_links = True),
             ally: discord.PermissionOverwrite(view_channel = True, send_messages = True, attach_files=True, embed_links = True),
@@ -643,6 +775,7 @@ class Test(commands.Cog):
         
 
         guild = ctx.guild
+        not_in_clan =get(guild.roles, id=988039468013473802)
         officer =get(guild.roles, id=881749441734914100)
         clan_member =get(guild.roles, id=881330782185074718)
         ally =get(guild.roles, id=989171283348574268)
@@ -653,7 +786,7 @@ class Test(commands.Cog):
         pfp = obey_clan_bot.display_avatar
 
         if ctx.user.guild_permissions.administrator:
-            embed = discord.Embed(title="Here you can get help with your clan tasks!", description=f"Below you can create ticket which will be created below this channel\n\n**Every** user with roles:\n{clan_member.mention}\n{ally.mention}\n{helper.mention}\nhas access to ticket you created, so they will be able to help you!\n\nBelow you have buttons for each task category in the clan, please click clan task category you have - it will make it easier to find the category faster by helpers\n\n**__DO NOT MAKE TROLL TICKETS__**", color=0xd80e4a)
+            embed = discord.Embed(title="Here you can get help with your clan tasks!", description=f"Below you can create ticket which will be created below this channel\n\n**Every** user with roles:\n{clan_member.mention}\n{ally.mention}\n{helper.mention}\n{not_in_clan.mention}\nhas access to ticket you created, so they will be able to help you!\n\nBelow you have buttons for each task category in the clan, please click clan task category you have - it will make it easier to find the category faster by helpers\n\n**__DO NOT MAKE TROLL TICKETS__**", color=0xd80e4a)
             embed.set_author(name="Obey Ticketing System",icon_url=pfp)
 
             await ctx.channel.send(embed=embed , view=TasksButtons())
