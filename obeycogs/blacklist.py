@@ -106,24 +106,28 @@ class Blacklist(commands.Cog):
     Choice(name="discord_id", value="discord_id")])
     async def blacklist_add(self, ctx: discord.Interaction, typeof:str="" ,content:str=""):
 
-        with open("./obey database/blacklist.json", "r") as f:
-                blacklist = json.load(f)
-                discord_list = blacklist["discord_list"]
-                ids = blacklist["list"]
-                page = blacklist["page"]
+        officer = discord.utils.get(ctx.user.roles, name="Clan Officer")
+        admin = discord.utils.get(ctx.user.roles, name="Administrator")
 
-        if typeof=="ingame_id":
-            list_of_ids = content.split()
-            ids.extend(list_of_ids)
-        if typeof=="discord_id":
-            list_of_ids = content.split()
-            discord_list.extend(list_of_ids)
+        if admin in ctx.user.roles or officer in ctx.user.roles or ctx.user.roles:
+            with open("./obey database/blacklist.json", "r") as f:
+                    blacklist = json.load(f)
+                    discord_list = blacklist["discord_list"]
+                    ids = blacklist["list"]
+                    page = blacklist["page"]
 
-        blacklist.update({"list":ids, "discord_list":discord_list, "page":page})
-        with open("./obey database/blacklist.json", "w") as f:
-                json.dump(blacklist, f, indent=1)
-                embed = discord.Embed(description="✅ Blacklist updated!")
-                await ctx.response.send_message(embed=embed)
+            if typeof=="ingame_id":
+                list_of_ids = content.split()
+                ids.extend(list_of_ids)
+            if typeof=="discord_id":
+                list_of_ids = content.split()
+                discord_list.extend(list_of_ids)
+
+            blacklist.update({"list":ids, "discord_list":discord_list, "page":page})
+            with open("./obey database/blacklist.json", "w") as f:
+                    json.dump(blacklist, f, indent=1)
+                    embed = discord.Embed(description="✅ Blacklist updated!")
+                    await ctx.response.send_message(embed=embed)
 
     @app_commands.command()
     @app_commands.choices(typeof=[
@@ -131,35 +135,44 @@ class Blacklist(commands.Cog):
     Choice(name="discord_id", value="discord_id")])
     async def blacklist_remove(self, ctx: discord.Interaction, typeof:str="" ,content:str=""):
 
-        with open("./obey database/blacklist.json", "r") as f:
-                blacklist = json.load(f)
-                discord_list = blacklist["discord_list"]
-                ids = blacklist["list"]
-                page = blacklist["page"]
+        officer = discord.utils.get(ctx.user.roles, name="Clan Officer")
+        admin = discord.utils.get(ctx.user.roles, name="Administrator")
 
-        if typeof=="ingame_id":
-            ids.remove(content)
-        if typeof=="discord_id":
-            discord_list.remove(content)
+        if admin in ctx.user.roles or officer in ctx.user.roles or ctx.user.roles:
+            with open("./obey database/blacklist.json", "r") as f:
+                    blacklist = json.load(f)
+                    discord_list = blacklist["discord_list"]
+                    ids = blacklist["list"]
+                    page = blacklist["page"]
 
-        blacklist.update({"list":ids, "discord_list":discord_list, "page":page})
-        with open("./obey database/blacklist.json", "w") as f:
-            json.dump(blacklist, f, indent=1)
-            embed = discord.Embed(description="✅ Blacklist updated")
-            await ctx.response.send_message(embed=embed)
+            if typeof=="ingame_id":
+                ids.remove(content)
+            if typeof=="discord_id":
+                discord_list.remove(content)
+
+            blacklist.update({"list":ids, "discord_list":discord_list, "page":page})
+            with open("./obey database/blacklist.json", "w") as f:
+                json.dump(blacklist, f, indent=1)
+                embed = discord.Embed(description="✅ Blacklist updated")
+                await ctx.response.send_message(embed=embed)
 
     @app_commands.command()
     async def blacklist(self, ctx: discord.Interaction):
-        with open("./obey database/blacklist.json", "r") as f:
-            blacklist = json.load(f)
-            ids = blacklist["list"]
-        page_num = 1
-        blacklist.update({"page":page_num})
-        with open("./obey database/blacklist.json", "w") as f:
-            json.dump(blacklist, f, indent=1)
-        id = ids[page_num - 1]
-        embed = discord.Embed(title=f"ID {page_num}/{len(ids)}",description=f"**{id}**")
-        await ctx.response.send_message(embed=embed,view=BlackList())
+
+        officer = discord.utils.get(ctx.user.roles, name="Clan Officer")
+        admin = discord.utils.get(ctx.user.roles, name="Administrator")
+
+        if admin in ctx.user.roles or officer in ctx.user.roles or ctx.user.roles:
+            with open("./obey database/blacklist.json", "r") as f:
+                blacklist = json.load(f)
+                ids = blacklist["list"]
+            page_num = 1
+            blacklist.update({"page":page_num})
+            with open("./obey database/blacklist.json", "w") as f:
+                json.dump(blacklist, f, indent=1)
+            id = ids[page_num - 1]
+            embed = discord.Embed(title=f"ID {page_num}/{len(ids)}",description=f"**{id}**")
+            await ctx.response.send_message(embed=embed,view=BlackList())
 
 async def setup(client):
     await client.add_cog(Blacklist(client))
