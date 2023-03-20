@@ -8,19 +8,14 @@ from discord.ui import Button, View
 from discord import app_commands
 from discord.app_commands import Choice
 import datetime
-import sqlite3
-import random
-import math
 import asyncio
 import time as tm
-import requests
 import json
 import os
-from easy_pil import load_image_async, Editor, Font
-import calendar
 from obeycogs.search import MemberList
 from obeycogs.help_task import TasksButtons, TopTaskDoneButton, BelowTaskDoneButton
 from obeycogs.clan_info import InfoButtons
+from obeycogs.guide_book import GuideButtons
 
 from itertools import cycle
 from dateutil.relativedelta import relativedelta
@@ -171,6 +166,7 @@ class PersistentViewBot(commands.Bot):
         self.add_view(TopTaskDoneButton())
         self.add_view(BelowTaskDoneButton())
         self.add_view(InfoButtons())
+        self.add_view(GuideButtons())
 
 client = PersistentViewBot()
 class TicketingControl(discord.ui.View):
@@ -485,8 +481,6 @@ async def on_member_join(member):
         guild = client.get_guild(706466887734919180)
         homo = get(guild.roles, id=1080554474831085600)
         await member.add_roles(homo) 
-
-
 
 if __name__ == "__main__":
     with open("token.json", "r") as toks:
