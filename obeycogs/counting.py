@@ -32,7 +32,6 @@ class Counting(commands.Cog):
         with open("./obey database/task_map.json", "r") as f:
             task_map = json.load(f)
             channel_id = int(task_map["channel_id"])
-            users = task_map["users"]
         
         if ctx.channel.id == counting_channel and ctx.id != 1032359513673707591:
                     with open("./obey database/counting.json", "r") as f:
@@ -63,7 +62,7 @@ class Counting(commands.Cog):
              
 
     @app_commands.command()
-    async def send_message(self, ctx: discord.Interaction, channel_id:int=1069782720684769300, thing_to_say:str=None) -> None:
+    async def send_message(self, ctx: discord.Interaction, thing_to_say:str=None) -> None:
         admin = discord.utils.get(ctx.user.roles, name="Administrator")
         officer = discord.utils.get(ctx.user.roles, name="Clan Officer")
         if admin in ctx.user.roles or officer in ctx.user.roles:
