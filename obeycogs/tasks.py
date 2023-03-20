@@ -33,31 +33,35 @@ class Tasks(commands.Cog):
         with open("./obey database/task_map.json", "r") as f:
             task_map = json.load(f)
             channel_id = int(task_map["channel_id"])
-            users = task_map["users"]
+            hours = task_map["hours"]
 
         channel_name = "｜⭐｜task completion"
         time_now = datetime.datetime.now()
         # 2023-03-03 14:46
-        
-        guild = self.client.get_guild(706466887734919180)
+
         map_channel = self.client.get_channel(channel_id)
+        task_channel = self.client.get_channel(1085984350589440170)
+        guild = self.client.get_guild(706466887734919180)
         clan_member = get(guild.roles, id=881330782185074718)
-        if (str(time_now))[11:16]=="09:00":
-            embed1= discord.Embed(description = f"Get online and don't forget to send pictures of tasks done here!",color=0x1dd74c)
+        if (str(time_now))[11:16]==hours[0]:
+            pins = await map_channel.pins()
+            for i in pins:
+                await i.unpin()
+            embed1= discord.Embed(description = f"Get online and don't forget to send pictures of tasks done here!\nIf you need help please create ticket in {task_channel.mention}",color=0x1dd74c)
             embed2 = discord.Embed(description="ここで完了したタスクのスクリーンショットを送信してください", color=0x1dd74c)
             await map_channel.send(f"{clan_member.mention}\n__Remember that you can send only **ONE** message per 2 hours__",embed=embed1)
             await map_channel.send(embed=embed2)
             await asyncio.sleep(60)
-        if (str(time_now))[11:16]=="19:00":
+        if (str(time_now))[11:16]==hours[1]:
             clan_channel = self.client.get_channel(1069782720684769300)
-            embed1= discord.Embed(description = f"Get online and don't forget to send pictures of tasks done here!",color=0x1dd74c)
+            embed1= discord.Embed(description = f"Get online and don't forget to send pictures of tasks done here!\nIf you need help please create ticket in {task_channel.mention}",color=0x1dd74c)
             embed2 = discord.Embed(description="ここで完了したタスクのスクリーンショットを送信してください", color=0x1dd74c)
             await map_channel.send(f"{clan_member.mention}",embed=embed1)
             await map_channel.send(embed=embed2)
             await asyncio.sleep(60)
-        if (str(time_now))[11:16]=="04:00":
+        if (str(time_now))[11:16]==hours[2]:
             clan_channel = self.client.get_channel(1069782720684769300)
-            embed1= discord.Embed(description = f"Get online and don't forget to send pictures of tasks done here!",color=0x1dd74c)
+            embed1= discord.Embed(description = f"Get online and don't forget to send pictures of tasks done here!\nIf you need help please create ticket in {task_channel.mention}",color=0x1dd74c)
             embed2 = discord.Embed(description="ここで完了したタスクのスクリーンショットを送信してください", color=0x1dd74c)
             await map_channel.send(f"{clan_member.mention}",embed=embed1)
             await map_channel.send(embed=embed2)
