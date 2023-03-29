@@ -34,16 +34,41 @@ class Tasks(commands.Cog):
             task_map = json.load(f)
             channel_id = int(task_map["channel_id"])
             hours = task_map["hours"]
+            warstart = task_map["warstart"]
 
         channel_name = "｜⭐｜task completion"
         time_now = datetime.datetime.now()
         # 2023-03-03 14:46
 
-        map_channel = self.client.get_channel(channel_id)
-        task_channel = self.client.get_channel(1085984350589440170)
-        guild = self.client.get_guild(706466887734919180)
-        clan_member = get(guild.roles, id=881330782185074718)
+        
+        # if (str(time_now))[11:16]=="8:55":
+        week_day = str(time_now.weekday())
+        print(warstart, week_day)
+
         if (str(time_now))[11:16]==hours[0]:
+
+            map_channel = self.client.get_channel(channel_id)
+            task_channel = self.client.get_channel(1085984350589440170)
+            guild = self.client.get_guild(706466887734919180)
+            clan_member = get(guild.roles, id=881330782185074718)
+            
+            if week_day==0:
+                clan_member =get(guild.roles, id=881330782185074718)
+                overwrites = {
+                    guild.default_role: discord.PermissionOverwrite(view_channel=False),
+                    clan_member: discord.PermissionOverwrite(view_channel=False)
+                }
+                await map_channel.edit(overwrites=overwrites)
+
+            if week_day==warstart:
+                clan_member = get(guild.roles, id=881330782185074718)
+                overwrites = {
+                    guild.default_role: discord.PermissionOverwrite(view_channel=False),
+                    clan_member: discord.PermissionOverwrite(view_channel=False)
+                }
+                await map_channel.edit(overwrites=overwrites)
+
+            
             pins = await map_channel.pins()
             for i in pins:
                 await i.unpin()
@@ -53,13 +78,25 @@ class Tasks(commands.Cog):
             await map_channel.send(embed=embed2)
             await asyncio.sleep(60)
         if (str(time_now))[11:16]==hours[1]:
+
+            map_channel = self.client.get_channel(channel_id)
+            task_channel = self.client.get_channel(1085984350589440170)
+            guild = self.client.get_guild(706466887734919180)
+            clan_member = get(guild.roles, id=881330782185074718)
             clan_channel = self.client.get_channel(1069782720684769300)
+
             embed1= discord.Embed(description = f"Get online and don't forget to send pictures of tasks done here!\nIf you need help please create ticket in {task_channel.mention}",color=0x1dd74c)
             embed2 = discord.Embed(description="ここで完了したタスクのスクリーンショットを送信してください", color=0x1dd74c)
             await map_channel.send(f"{clan_member.mention}",embed=embed1)
             await map_channel.send(embed=embed2)
             await asyncio.sleep(60)
         if (str(time_now))[11:16]==hours[2]:
+
+            map_channel = self.client.get_channel(channel_id)
+            task_channel = self.client.get_channel(1085984350589440170)
+            guild = self.client.get_guild(706466887734919180)
+            clan_member = get(guild.roles, id=881330782185074718)
+
             clan_channel = self.client.get_channel(1069782720684769300)
             embed1= discord.Embed(description = f"Get online and don't forget to send pictures of tasks done here!\nIf you need help please create ticket in {task_channel.mention}",color=0x1dd74c)
             embed2 = discord.Embed(description="ここで完了したタスクのスクリーンショットを送信してください", color=0x1dd74c)
