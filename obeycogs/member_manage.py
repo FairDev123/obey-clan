@@ -3,6 +3,7 @@ from discord.ext import commands
 from discord.utils import get
 from discord import app_commands
 import json
+import datetime
 
 async def add_role(var, ctx):
 
@@ -15,7 +16,7 @@ async def add_role(var, ctx):
         blacklist_pg = blacklist["list"]
 
     guild = ctx.guild
-    member = guild.get_member(int(temp_user["user_id"]))
+    member = guild.get_member(int(temp_user[str(ctx.user.id)]["user_id"]))
     
     if var=="Not in Clan Rn":
         
@@ -89,9 +90,27 @@ async def add_clanmate(ctx, clanmate_id):
         guild = ctx.guild
         clan_member_role =get(guild.roles, id=881330782185074718)
 
-        member = guild.get_member(int(temp_user["user_id"]))
+        member = guild.get_member(int(temp_user[str(ctx.user.id)]["user_id"]))
 
     if str(clanmate_id) not in blacklist_pg:
+
+        with open("./obey database/members.json", "r") as f:
+            members = json.load(f)
+
+        time_now = datetime.datetime.now()
+        time_after = str(time_now - datetime.timedelta(minutes=1))
+        members.update({str(member.id):{
+            "ingame_id": str(clanmate_id),
+            "valor": "0",
+            "clan_rank": "Clan Member",
+            "nick": str(member.name),
+            "discord_id": str(member.id),
+            "joined_at": time_after[0:16],
+            "pic": str(member.display_avatar)
+        }})
+
+        with open("./obey database/members.json", "w") as f:
+            json.dump(members, f, indent=1)
 
         member_name = f"{member.name} | {clanmate_id}"
         await member.edit(nick=member_name)
@@ -185,7 +204,7 @@ class ClanmateButtons(discord.ui.View):
         officer =get(guild.roles, id=881749441734914100)
         
         if admin in ctx.user.roles or officer in ctx.user.roles or ctx.user.guild_permissions.administrator:
-            await ctx.response.send_message("test", ephemeral=True)
+            await ctx.response.send_message("Work in progress...", ephemeral=True)
 
 class AddingToClan(commands.Cog):
     def __init__(self, client) -> None:
@@ -193,7 +212,6 @@ class AddingToClan(commands.Cog):
 
     @app_commands.command(description="editing member")
     async def edit(self, ctx: discord.Interaction, member: discord.Member = None):
-        
         member_id = member.id
         with open("./obey database/members.json", "r") as f:
             members = json.load(f)
@@ -220,7 +238,7 @@ class AddingToClan(commands.Cog):
                 temp_user = json.load(f)
                 user_id = str(member_id)
             with open("./obey database/temp_user.json", "w") as f:
-                temp_user.update({"user_id":user_id})
+                temp_user.update({str(ctx.user.id):{"user_id":user_id}})
                 json.dump(temp_user, f)
             
 async def setup(client):
