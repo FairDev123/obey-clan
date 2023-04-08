@@ -8,9 +8,9 @@ app.use(express.json())
 
 const db = mysql.createConnection({
     user: "admin",
-    password: "ZXb0G3xT",
-    port: 17066,
-    host: "mysql-119204-0.cloudclusters.net",
+    password: "password",
+    port: "port,
+    host: "host",
     database: "Obey Clan"
 })
 
