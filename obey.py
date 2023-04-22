@@ -12,19 +12,23 @@ import asyncio
 import time as tm
 import json
 import os
+import mysql.connector
+
+# # button
+
 from obeycogs.search import MemberList
 from obeycogs.help_task import TasksButtons, TopTaskDoneButton, BelowTaskDoneButton
 from obeycogs.clan_info import InfoButtons
 from obeycogs.guide_book import GuideButtons
+from obeycogs.captcha import CaptchaAuthButton
 
-from itertools import cycle
-from dateutil.relativedelta import relativedelta
+# # 
 
 class RecruitModal(discord.ui.Modal, title="Pass your info to recruit you"):
     id_here = discord.ui.TextInput(
         style=discord.TextStyle.short,
         label="1. What is your ID in game?",
-        min_length=8,
+        min_length=7,
         max_length=9,
         required=True,
         placeholder="Type your pg ingame id here.")
@@ -33,18 +37,38 @@ class RecruitModal(discord.ui.Modal, title="Pass your info to recruit you"):
             
         id = self.id_here
         OBEY = ctx.guild
-        
-        with open("./obey database/blacklist.json", "r") as f:
-            blacklist = json.load(f)
+
+        with open("db_con_info.json", "r") as f:
+            db_con = json.load(f)
+            host = db_con["host"]
+            user = "admin"
+            password = db_con["pass"]
+            port = db_con["port"]
+            
+            db = mysql.connector.connect(
+            host=host,
+            user=user,
+            passwd=password,
+            port=port,
+            database="Obey Clan")
+
+            cursor = db.cursor()
+            cursor.execute(f"SELECT * FROM pg_blacklist")
+            
+            blacklist = []
+
+            for row_id, ingame_id, clan in cursor:
+                blacklist.append(ingame_id)
+
         id = str(id)
         if id.isnumeric():
-            if str(self.id_here) not in blacklist["list"]:
+            if int(str(self.id_here)) not in blacklist:
                 OBEY = ctx.guild
                 officer = get(OBEY.roles, id=985998655666401330)
                 user_id = str(ctx.user.id)
                 with open("./obey database/ticket_users.json", "r") as f:
                     ticket_users = json.load(f)
-                    avtive = ticket_users[user_id]["active"]
+                    active = ticket_users[user_id]["active"]
 
                 user_id = str(ctx.user.id)
                 with open("./obey database/ticket_users.json", "r") as f:
@@ -157,22 +181,21 @@ class PersistentViewBot(commands.Bot):
         super().__init__(command_prefix=commands.when_mentioned_or('?'), intents=intents)
 
     async def setup_hook(self) -> None:
-        self.add_view(TopMenu())
-        self.add_view(CreateTicketButton())
-        self.add_view(CloseConfirm())
-        self.add_view(TicketingControl())
-        self.add_view(MemberList())
-        self.add_view(TasksButtons())
-        self.add_view(TopTaskDoneButton())
-        self.add_view(BelowTaskDoneButton())
-        self.add_view(InfoButtons())
-        self.add_view(GuideButtons())
+
+        VIEW_LIST = [TopMenu(), CreateTicketButton(), CloseConfirm(), MemberList(), TasksButtons(), TopTaskDoneButton(), BelowTaskDoneButton(),InfoButtons(), GuideButtons(), CaptchaAuthButton()]
+
+        view_count = 0
+
+        for i in VIEW_LIST:
+            view_count = view_count + 1
+            self.add_view(i)
+
+        print(f"Loaded {view_count} button views")
 
 client = PersistentViewBot()
 class TicketingControl(discord.ui.View):
     def __init__(self, *, timeout=None):
         super().__init__(timeout=timeout)
-
 
     @discord.ui.button(custom_id="transcript_ticket", label="Transcript", style=discord.ButtonStyle.gray)
     async def transcript(self, ctx:discord.Interaction, button: discord.ui.button):
@@ -319,14 +342,14 @@ class CloseConfirm(discord.ui.View):
         pfp = obey_clan_bot.display_avatar
         
         # # permission overwrites for @everyone and ticket user
-
-        officer = get(guild.roles, id=881749441734914100) 
-        overwrites = {
-            ctx.guild.default_role: discord.PermissionOverwrite(view_channel=False),
-            ticket_user: discord.PermissionOverwrite(view_channel = True, send_messages = False, attach_files=False, embed_links = False),
-            officer: discord.PermissionOverwrite(view_channel = True, send_messages = True, attach_files=True, embed_links = True)
-            }
-        await ctx.channel.edit(overwrites=overwrites)
+        if ticket_user in guild.members:
+            officer = get(guild.roles, id=881749441734914100) 
+            overwrites = {
+                ctx.guild.default_role: discord.PermissionOverwrite(view_channel=False),
+                ticket_user: discord.PermissionOverwrite(view_channel = True, send_messages = False, attach_files=False, embed_links = False),
+                officer: discord.PermissionOverwrite(view_channel = True, send_messages = True, attach_files=True, embed_links = True)
+                }
+            await ctx.channel.edit(overwrites=overwrites)
 
         # # channel name change to closed
 
@@ -442,9 +465,9 @@ async def create_ticket(ctx: discord.Interaction) -> None:
             OBEY = ctx.guild
             obey_clan_bot = OBEY.get_member(1032359513673707591)
             pfp = obey_clan_bot.display_avatar
-            requirements = discord.Embed(title="__の乃乇ﾘ   Requirements__", description="[**1**] -- Can you **Warstart?** If so how long?\n[**2**] -- How many raids can you attend per war?\n[**3**] -- **Frequently check Discord**.\n[**4**] -- **Collect 5-6 incomes per day**.\n[**5**] -- **Get 1800 valor daily from clan tasks and your own?**\n**[**6**] -- Can you reach 18.000 valor points before war end?**\n**[**7**] -- Lt. Colonel + \n[**8**] -- Level 65**\n\n**__Before creating a ticket__**\n**Do NOT create a ticket if you cannot meet the requirements above**.", color=0xd80e4a)
+            requirements = discord.Embed(title="Hello guys\nObey is recruiting!<:ObeyXBlkt:968267536703561758>\nThe requirements to join our clan is:", description=f"<:ObeyXBlkt:968267536703561758> - **Have to be Major as clan rank.**\n\n<:ObeyXBlkt:968267536703561758> - **Minimum first day to do all tasks.**\n**Pls don't create ticket if you can't do.**\n\n<:ObeyXBlkt:968267536703561758> - **Minimum valor to have till the end of war is 15k-18k+(nonrestricted).**\n**Restricted ones 10k-12k+.**\n\n<:ObeyXBlkt:968267536703561758> - **Show up on raids**.\n**Its precise if you wanna get valor.**\n\n<:ObeyXBlkt:968267536703561758> - **Collect all 6 incomes daily.**\n\n<:ObeyXBlkt:968267536703561758> - **Top 3 players will receive chests as a gift or possibly other things.**<:chest_3:1086294840230301876> ", color=0xd80e4a)
             requirements.set_thumbnail(url="https://images-ext-1.discordapp.net/external/v1P69Mafmm_8sHrUJ_KTyU7PCFTm9b5yPY_dpVbai8E/https/cdn-longterm.mee6.xyz/plugins/embeds/images/706466887734919180/4ffa20e2d9a9192cbfe4978059c291a8ab870998c725dd5949a879d8abc2c3c8.png")
-            requirements.set_image(url="https://i.imgur.com/TswvMUj.png")
+            requirements.set_image(url="https://cdn.discordapp.com/attachments/1076201264892891166/1092362833972437092/Picsart_23-04-03_10-19-48-146.png")
             
             ticket_embed = discord.Embed(description="""**Click the** **__"Create Ticket"__** **button below and send your id to discord form, then our ticket system will create ticket for you in which you must answer the questions.**(**__when button doesn't working - click it again__**)""", color=0xd80e4a)
             ticket_embed.set_author(name=obey_clan_bot.name, icon_url=pfp)
@@ -463,24 +486,82 @@ async def on_ready():
     for i in os.listdir("./obeycogs"):
                 if i.endswith(".py"):
                     await client.load_extension(f"obeycogs.{i[:-3]}")
-                    print(f"Pomyślnie załadowano cog: {i}")
+    for i in os.listdir("./groups"):
+                if i.endswith(".py"):
+                    await client.load_extension(f"groups.{i[:-3]}")
+
+    # for i in os.listdir("./obeycogs/clan_tasks"):
+    #             if i.endswith(".py"):
+    #                 await client.load_extension(f"obeycogs.clan_tasks.{i[:-3]}")
+    # print("Loaded tasks cogs")
     channel = client.get_channel(1025734128303345734)
     synced = await client.tree.sync()
-    await channel.send("Działam")
 
 @client.event
-async def on_member_join(member):
+async def on_audit_log_entry_create(entry):
 
-    discord_id = str(member.id)
+    guild = client.get_guild(706466887734919180)
+    obey_clan_bot = guild.get_member(1032359513673707591)
+    
+    pfp = obey_clan_bot.display_avatar
 
-    with open("./obey database/blacklist.json", "r") as f:
-        blacklist = json.load(f)
-        discord_table = blacklist["discord_list"]
+    if entry.action == discord.AuditLogAction.member_role_update:
+        
+        if len(entry.after.roles) > 0:
+            print(str(entry.after.roles))
+            if str(entry.after.roles[-1]) == "Clan Member" and entry.user.id != 1032359513673707591:
+                print(f'Dodano nowego klanowicza {str(entry.after.roles[0])}')
+                member = entry.target
 
-    if discord_id in discord_table:
-        guild = client.get_guild(706466887734919180)
-        homo = get(guild.roles, id=1080554474831085600)
-        await member.add_roles(homo) 
+                clan_member =get(guild.roles, id=881330782185074718)
+
+                await member.remove_roles(clan_member)
+                logs = client.get_channel(1080523226586820699)
+                embed = discord.Embed(description=f"**You can't give roles like that. Please use __/edit__ command instead, This allows for quick verification whether the user is not a spy**", color=0xd80e4a)
+                embed.set_author(name="Obey Security", icon_url=pfp)
+                await logs.send(f"{entry.user.mention}", embed=embed)
+        else:
+            member = entry.target
+
+            role_entry = str(entry.before.roles[0])
+            
+            role = get(guild.roles, name=role_entry)
+            
+            if role_entry == "Clan Member":
+                with open("db_con_info.json", "r") as f:
+                    db_con = json.load(f)
+                    host = db_con["host"]
+                    user = "admin"
+                    password = db_con["pass"]
+                    port = db_con["port"]
+            
+                db = mysql.connector.connect(
+                    host=host,
+                    user=user,
+                    passwd=password,
+                    port=port,
+                    database="Obey Clan")
+
+                cursor = db.cursor()
+
+                cursor.execute(f"SELECT * FROM members WHERE discord_id={member.id}")
+                
+                discord_ids, discord_names, pg_ids, pg_names, clan_ranks, valors = [],[],[],[],[],[]
+                data = {}
+
+                for col_id, disocrd_id, discord_name, pg_id, pg_name, clan_rank, valor in cursor:
+                    discord_ids.append(disocrd_id)
+                    discord_names.append(discord_name)
+                    pg_ids.append(pg_id)
+                    pg_names.append(pg_name)
+                    clan_ranks.append(clan_rank)
+                    valors.append(valor)
+                
+                data.update({"discord_ids":discord_ids,"discord_names":discord_names,"pg_ids":pg_ids,"pg_names":pg_names,"clan_ranks":clan_ranks,"valors":valors})
+                if len(discord_ids) > 0:
+                    cursor.execute(f"DELETE FROM members WHERE discord_id={member.id}")
+                    db.commit()
+                    print(f"Usunięto rangę {role.name}")
 
 if __name__ == "__main__":
     with open("token.json", "r") as toks:
