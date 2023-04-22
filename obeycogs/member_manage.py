@@ -4,6 +4,8 @@ from discord.utils import get
 from discord import app_commands
 import json
 import datetime
+import mysql.connector
+from groups.search import MembersListButtons
 
 async def add_role(var, ctx):
 
@@ -80,7 +82,6 @@ async def add_role(var, ctx):
         embed = discord.Embed(title=f"Saccessfully {spy.mention} was added")
         await ctx.response.send_message(embed=embed, ephemeral=True)
         
-
 async def add_clanmate(ctx, clanmate_id):
     with open("./obey database/temp_user.json", "r") as f:
         temp_user = json.load(f)
@@ -204,7 +205,52 @@ class ClanmateButtons(discord.ui.View):
         officer =get(guild.roles, id=881749441734914100)
         
         if admin in ctx.user.roles or officer in ctx.user.roles or ctx.user.guild_permissions.administrator:
-            await ctx.response.send_message("Work in progress...", ephemeral=True)
+            
+            await ctx.response.defer(thinking=True, ephemeral=True)
+
+            with open("db_con_info.json", "r") as f:
+                db_con = json.load(f)
+                host = db_con["host"]
+                user = "admin"
+                password = db_con["pass"]
+                port = db_con["port"]
+            
+            db = mysql.connector.connect(
+            host=host,
+            user=user,
+            passwd=password,
+            port=port,
+            database="Obey Clan")
+
+            with open("./obey database/user_query.json", "r") as f:
+                user_query = json.load(f)
+                discord_id = user_query[str(ctx.user.id)]["user_id"]
+
+            cursor = db.cursor()
+            cursor.execute(f"SELECT * FROM members WHERE discord_id={discord_id}")
+
+            discord_ids, discord_names, pg_ids, pg_names, clan_ranks, valors = [],[],[],[],[],[]
+            data = {}
+
+            for col_id, disocrd_id, discord_name, pg_id, pg_name, clan_rank, valor in cursor:
+                discord_ids.append(disocrd_id)
+                discord_names.append(discord_name)
+                pg_ids.append(pg_id)
+                pg_names.append(pg_name)
+                clan_ranks.append(clan_rank)
+                valors.append(valor)
+                break
+            
+            data.update({"discord_ids":discord_ids,"discord_names":discord_names,"pg_ids":pg_ids,"pg_names":pg_names,"clan_ranks":clan_ranks,"valors":valors})
+
+            member = ctx.guild.get_member(discord_ids[0])
+
+            user_info = discord.Embed(title=f"Info about {discord_name}", description=f"**PG ID:**\n{pg_id}\n\n**PG NAME:**\n{pg_name}\n\n**CLAN RANK:**\n{clan_rank}\n\n**VALOR POINTS:**\n{valor}", color=0xd80e4a)
+            user_info.set_thumbnail(url=member.display_avatar)
+            user_info.set_footer(text=f"Page 1/{len(discord_ids)}")
+            user_info.set_author(name=discord_name,icon_url=member.display_avatar)
+
+            await ctx.followup.send(embed=user_info, ephemeral=True)
 
 class AddingToClan(commands.Cog):
     def __init__(self, client) -> None:
@@ -212,15 +258,47 @@ class AddingToClan(commands.Cog):
 
     @app_commands.command(description="editing member")
     async def edit(self, ctx: discord.Interaction, member: discord.Member = None):
-        member_id = member.id
-        with open("./obey database/members.json", "r") as f:
-            members = json.load(f)
 
         guild = ctx.guild
         admin = discord.utils.get(ctx.user.roles, name="Administrator")
         officer =get(guild.roles, id=881749441734914100)
         
         if admin in ctx.user.roles or officer in ctx.user.roles or ctx.user.guild_permissions.administrator:
+
+            member_id = member.id
+            with open("./obey database/members.json", "r") as f:
+                members = json.load(f)
+
+            with open("db_con_info.json", "r") as f:
+                db_con = json.load(f)
+                host = db_con["host"]
+                user = "admin"
+                password = db_con["pass"]
+                port = db_con["port"]
+                
+            db = mysql.connector.connect(
+                host=host,
+                user=user,
+                passwd=password,
+                port=port,
+                database="Obey Clan")
+
+            cursor = db.cursor()
+            cursor.execute(f"SELECT * FROM members")
+
+            discord_ids, discord_names, pg_ids, pg_names, clan_ranks, valors = [],[],[],[],[],[]
+            data = {}
+
+            for col_id, disocrd_id, discord_name, pg_id, pg_name, clan_rank, valor in cursor:
+                    discord_ids.append(disocrd_id)
+                    discord_names.append(discord_name)
+                    pg_ids.append(pg_id)
+                    pg_names.append(pg_name)
+                    clan_ranks.append(clan_rank)
+                    valors.append(valor)
+            
+            data.update({"discord_ids":discord_ids,"discord_names":discord_names,"pg_ids":pg_ids,"pg_names":pg_names,"clan_ranks":clan_ranks,"valors":valors})
+            print(data)
             
             user_roles = " ".join(role.mention for role in member.roles)
             user_perms = " ".join(str(permission.count) for permission in member.guild_permissions)
@@ -229,16 +307,16 @@ class AddingToClan(commands.Cog):
             edit_embed.set_author(icon_url=member.display_avatar, name=member.display_name)
             edit_embed.set_thumbnail(url=member.display_avatar)
 
-            if str(member_id) in members:
+            if int(member_id) in data["discord_ids"]:
                 await ctx.response.send_message(embed=edit_embed, view=ClanmateButtons())
             else:
                 await ctx.response.send_message(embed=edit_embed, view=MemberButtons())
 
-            with open("./obey database/temp_user.json", "r") as f:
+            with open("./obey database/user_query.json", "r") as f:
                 temp_user = json.load(f)
                 user_id = str(member_id)
-            with open("./obey database/temp_user.json", "w") as f:
-                temp_user.update({str(ctx.user.id):{"user_id":user_id}})
+            with open("./obey database/user_query.json", "w") as f:
+                temp_user.update({str(ctx.user.id):{"user_id":user_id,"data":data}})
                 json.dump(temp_user, f)
             
 async def setup(client):
